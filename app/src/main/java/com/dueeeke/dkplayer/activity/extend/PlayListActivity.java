@@ -1,6 +1,8 @@
 package com.dueeeke.dkplayer.activity.extend;
 
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,7 @@ import com.dueeeke.videoplayer.listener.OnVideoViewStateChangeListener;
 import com.dueeeke.videoplayer.player.VideoView;
 import com.dueeeke.videoplayer.util.PlayerUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,7 +47,16 @@ public class PlayListActivity extends AppCompatActivity {
 
         //加载第一条数据
         VideoBean videoBean = data.get(0);
-        mVideoView.setUrl(videoBean.getUrl());
+
+        String baseUrl = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Movies/";
+        ArrayList urls = new ArrayList<String>();
+        urls.add(Uri.parse(baseUrl + "11.mp4").toString());
+        urls.add(Uri.parse(baseUrl + "12.mp4").toString());
+        urls.add(Uri.parse(baseUrl + "13.mp4").toString());
+        urls.add(Uri.parse(baseUrl + "14.mp4").toString());
+        mVideoView.setListUrl(urls);
+
+//        mVideoView.setUrl(videoBean.getUrl());
         mStandardVideoController.setTitle(videoBean.getTitle());
         mVideoView.setVideoController(mStandardVideoController);
 

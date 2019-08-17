@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
@@ -25,6 +26,7 @@ import android.widget.FrameLayout;
 import com.dueeeke.videoplayer.R;
 import com.dueeeke.videoplayer.controller.BaseVideoController;
 import com.dueeeke.videoplayer.controller.MediaPlayerControl;
+import com.dueeeke.videoplayer.listener.OnSourceChangeListener;
 import com.dueeeke.videoplayer.listener.OnVideoViewStateChangeListener;
 import com.dueeeke.videoplayer.listener.PlayerEventListener;
 import com.dueeeke.videoplayer.util.L;
@@ -50,6 +52,9 @@ public class VideoView extends FrameLayout implements MediaPlayerControl, Player
     protected BaseVideoController mVideoController;//控制器
 
     protected IRenderView mRenderView;
+
+    protected OnSourceChangeListener mSourceChangeListener;
+
     /**
      * 真正承载播放器视图的容器
      */
@@ -76,6 +81,7 @@ public class VideoView extends FrameLayout implements MediaPlayerControl, Player
 
     protected boolean mIsMute;//是否静音
 
+    protected List<String> mCurrentListUrl; //播放列表
     protected String mCurrentUrl;//当前播放视频的地址
     protected Map<String, String> mHeaders;//当前视频地址的请求头
     protected AssetFileDescriptor mAssetFileDescriptor;//assets文件
@@ -270,6 +276,24 @@ public class VideoView extends FrameLayout implements MediaPlayerControl, Player
         mPlayerContainer.addView(mRenderView.getView(), 0, params);
     }
 
+
+    public void setSourceChangeListener(OnSourceChangeListener listener) {
+        this.mSourceChangeListener = listener;
+    }
+
+    /**
+     * 数据源切换回调
+     *
+     * @param currentIndex
+     */
+    @Override
+    public void onSourceChange(int currentIndex) {
+//        Log.e("kermitye", "===source change: " + currentIndex + " / " + mCurrentListUrl.get(currentIndex));
+        if (mSourceChangeListener != null) {
+            mSourceChangeListener.onSourceChange(currentIndex);
+        }
+    }
+
     /**
      * 开始准备播放（直接播放）
      */
@@ -278,7 +302,9 @@ public class VideoView extends FrameLayout implements MediaPlayerControl, Player
         if (needReset) mMediaPlayer.reset();
         if (mAssetFileDescriptor != null) {
             mMediaPlayer.setDataSource(mAssetFileDescriptor);
-        } else {
+        } else if (mCurrentListUrl != null && mCurrentListUrl.size() > 0) {
+            mMediaPlayer.setListDataSource(mCurrentListUrl, mHeaders);
+        }  else {
             mMediaPlayer.setDataSource(mCurrentUrl, mHeaders);
         }
         mMediaPlayer.prepareAsync();
@@ -587,6 +613,18 @@ public class VideoView extends FrameLayout implements MediaPlayerControl, Player
         mCurrentUrl = url;
         mHeaders = headers;
     }
+
+    /**
+     * 播放一组音视频
+     *
+     * @param urls
+     */
+    public void setListUrl(List<String> urls) {
+        mCurrentUrl = urls.get(0);
+        mCurrentListUrl = urls;
+        mHeaders = null;
+    }
+
 
     /**
      * 用于播放assets里面的视频文件

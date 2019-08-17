@@ -6,6 +6,7 @@ import android.view.SurfaceHolder;
 
 import com.dueeeke.videoplayer.listener.PlayerEventListener;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,6 +51,13 @@ public abstract class AbstractPlayer {
      * @param headers 播放地址请求头
      */
     public abstract void setDataSource(String path, Map<String, String> headers);
+
+    /**
+     * 播放一个集合
+     * @param listPath 播放地址集合
+     * @param headers
+     */
+    public abstract void setListDataSource(List<String> listPath, Map<String, String> headers);
 
     /**
      * 用于播放raw和asset里面的视频文件

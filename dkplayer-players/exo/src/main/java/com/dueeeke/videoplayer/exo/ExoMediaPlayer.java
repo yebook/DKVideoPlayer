@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ext.rtmp.RtmpDataSourceFactory;
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
@@ -32,6 +33,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -50,6 +52,9 @@ public class ExoMediaPlayer extends AbstractPlayer implements VideoListener, Pla
     private DataSource.Factory mediaDataSourceFactory;
     private Map<String, String> mHeaders;
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
+
+    private int mLastIndex = -1;
+    private ConcatenatingMediaSource mConcatenatingMediaSource;
 
     public ExoMediaPlayer(Context context) {
         mAppContext = context.getApplicationContext();
@@ -79,14 +84,38 @@ public class ExoMediaPlayer extends AbstractPlayer implements VideoListener, Pla
         //no support
     }
 
+    @Override
+    public void setListDataSource(List<String> listPath, Map<String, String> headers) {
+        mLastIndex = -1;
+        mHeaders = headers;
+        mConcatenatingMediaSource = getConcatenatingMediaSource(listPath);
+        mDataSource = listPath.get(0);
+        mMediaSource = mConcatenatingMediaSource.getMediaSource(0);
+    }
+
+    private ConcatenatingMediaSource getConcatenatingMediaSource(List<String> listPath) {
+        ConcatenatingMediaSource cms = new ConcatenatingMediaSource();
+        for (String path: listPath) {
+            MediaSource mediaSource = getMediaSource(path);
+            cms.addMediaSource(mediaSource);
+        }
+        return cms;
+    }
+
     private MediaSource getMediaSource() {
-        Uri contentUri = Uri.parse(mDataSource);
+        return getMediaSource(mDataSource);
+    }
+
+
+    private MediaSource getMediaSource(String path) {
+        Uri contentUri = Uri.parse(path);
         if ("rtmp".equals(contentUri.getScheme())) {
             RtmpDataSourceFactory rtmpDataSourceFactory = new RtmpDataSourceFactory(null);
             return new ExtractorMediaSource.Factory(rtmpDataSourceFactory)
                     .createMediaSource(contentUri);
         }
-        int contentType = Util.inferContentType(mDataSource);
+
+        int contentType = Util.inferContentType(path);
         switch (contentType) {
             case C.TYPE_DASH:
                 return new DashMediaSource.Factory(
@@ -173,7 +202,11 @@ public class ExoMediaPlayer extends AbstractPlayer implements VideoListener, Pla
             mInternalPlayer.setVideoSurface(mSurface);
         }
         mIsPreparing = true;
-        mInternalPlayer.prepare(mMediaSource);
+        if (mConcatenatingMediaSource != null && mConcatenatingMediaSource.getSize() > 0) {
+            mInternalPlayer.prepare(mConcatenatingMediaSource);
+        } else {
+            mInternalPlayer.prepare(mMediaSource);
+        }
         mInternalPlayer.setPlayWhenReady(true);
     }
 
@@ -349,5 +382,21 @@ public class ExoMediaPlayer extends AbstractPlayer implements VideoListener, Pla
                 mPlayerEventListener.onInfo(MEDIA_INFO_VIDEO_ROTATION_CHANGED, unappliedRotationDegrees);
             }
         }
+    }
+
+    //切换数据源回调
+    @Override
+    public void onPositionDiscontinuity(int reason) {
+        if (mInternalPlayer != null) {
+            int sourceIndex = mInternalPlayer.getCurrentWindowIndex();
+            if (mPlayerEventListener != null) {
+                if (mLastIndex == sourceIndex) {
+                    return;
+                }
+                mLastIndex = sourceIndex;
+                mPlayerEventListener.onSourceChange(sourceIndex);
+            }
+        }
+
     }
 }

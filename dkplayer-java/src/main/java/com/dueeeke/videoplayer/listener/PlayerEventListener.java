@@ -16,4 +16,5 @@ public interface PlayerEventListener {
 
     void onVideoSizeChanged(int width, int height);
 
+    void onSourceChange(int currentIndex);
 }
