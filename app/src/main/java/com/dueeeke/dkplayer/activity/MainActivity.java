@@ -160,4 +160,8 @@ public class MainActivity extends AppCompatActivity {
     public void pip(View view) {
         startActivity(new Intent(this, PIPDemoActivity.class));
     }
+
+    public void multi(View view) {
+        startActivity(new Intent(this, MultiPlayerActivity.class));
+    }
 }

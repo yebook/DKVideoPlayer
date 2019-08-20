@@ -151,6 +151,7 @@
             android:name=".activity.pip.TinyScreenListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
+        <activity android:name=".activity.MultiPlayerActivity" />
     </application>
 
 </manifest>

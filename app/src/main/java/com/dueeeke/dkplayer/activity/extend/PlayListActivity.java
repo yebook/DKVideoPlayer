@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -70,6 +71,7 @@ public class PlayListActivity extends AppCompatActivity {
 
             @Override
             public void onPlayStateChanged(int playState) {
+                Log.e("kermitye", "=====onPlayStateChanged: " + playState);
                 if (playState == VideoView.STATE_PLAYBACK_COMPLETED) {
                     if (data != null) {
                         mCurrentVideoPosition++;

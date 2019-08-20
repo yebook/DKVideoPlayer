@@ -94,6 +94,8 @@ dependencies {
     implementation project(path: ':dkplayer-players:ijk-armv7a')
     implementation project(path: ':dkplayer-players:ijk-x86_64')
 
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
 
 //    implementation 'com.github.dueeeke.dkplayer:dkplayer-java:3.0.2'
 //    implementation 'com.github.dueeeke.dkplayer:dkplayer-ui:3.0.2'
