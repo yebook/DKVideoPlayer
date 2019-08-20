@@ -55,4 +55,33 @@ public class FileUtil {
         }
         return duration;
     }
+
+    public static void remvoeCache() {
+        final File cacheDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/ijkCache");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                deleteFile(cacheDir);
+            }
+        }).start();
+    }
+
+
+    public static void deleteFile(File file) {
+        if (file == null || !file.exists())
+            return;
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            for (int i = 0; i < files.length - 1; i++) {
+                deleteFile(files[i]);
+            }
+            file.delete();
+        } else {
+            file.delete();
+        }
+    }
+    
+
+
+
 }

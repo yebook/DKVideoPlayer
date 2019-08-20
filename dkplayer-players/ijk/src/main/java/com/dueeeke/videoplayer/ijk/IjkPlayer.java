@@ -209,6 +209,8 @@ public class IjkPlayer extends AbstractPlayer {
             public void run() {
                 try {
                     mMediaPlayer.release();
+                    if (mConcatBean != null)
+                        FileUtil.deleteFile(mConcatBean.mConcatFile);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -342,7 +344,7 @@ public class IjkPlayer extends AbstractPlayer {
                 if (position >= endTime) {
                     mCurrentIndex++;
                     Log.e("kermitye", "======sourceChange:" + mCurrentIndex);
-                    if(mPlayerEventListener != null) {
+                    if (mPlayerEventListener != null) {
                         mPlayerEventListener.onSourceChange(mCurrentIndex);
                     }
                 }
